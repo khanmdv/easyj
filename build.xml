@@ -1,0 +1,96 @@
+<project name="EasyJ" default="dist" basedir=".">
+	<property file="build.properties" />
+
+	<description>
+        A Java framework to ease development with collections framework and files.
+    </description>
+	<!-- set global properties for this build -->
+	<property name="src" 	location="src" />
+	<property name="build" 	location="build"/>
+	<property name="temp" 	location="temp"/>
+	<property name="dist"  	location="dist"/>
+	<property name="lib"  	location="ref"/>
+	<property name="cp" 	location="${JAVA_HOME}"/>
+	<property name="reports" location="reports"/>
+
+	<target name="init">
+		<echo>Preparing...</echo>
+		<!-- Create the time stamp -->
+		<tstamp/>
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${build}"/>
+	</target>
+
+	<target name="compile" depends="init"
+        description="compile the source ">
+		<!-- Compile the java code from ${src} into ${build} -->
+		<echo>Compiling...</echo>
+		<javac
+  				srcdir="${src}"
+  				destdir="${build}"
+  				includes="com/easyJ/**"  				
+  				debug="on"
+  				optimize="true"
+  				failonerror="true"
+  				deprecation="yes"			
+  				>
+			<classpath>
+				<fileset dir="${lib}">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+		</javac>
+	</target>
+
+	<target name="dist-internal" depends="compile"
+	        description="generate the distribution" >
+			<echo>Building...</echo>
+			<!-- Create the distribution directory -->
+			<mkdir dir="${temp}"/>
+			<echo>Making JAR...</echo>
+			<!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
+			<jar jarfile="${temp}/easyj.jar" basedir="${build}"/>
+			<copy todir="${temp}/">
+		    <fileset dir="${lib}">
+		      <include name="*.jar"/>
+		    </fileset>
+		  </copy>
+		</target>
+	
+	<target name="dist" depends="clean, dist-internal"
+        description="generate the distribution" >
+		<echo>Building...</echo>
+		<!-- Create the distribution directory -->
+		<mkdir dir="${dist}"/>		
+		<echo>Making JAR...</echo>
+		<!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
+		<jar jarfile="${dist}/easyj-${DSTAMP}.jar" basedir="${build}">
+			<zipgroupfileset dir="temp" includes="*.jar"/>
+		</jar>
+	</target>
+
+	<target name="clean"
+        description="clean up" >
+		<!-- Delete the ${build} and ${dist} directory trees -->
+		<delete dir="${build}"/>
+		<delete dir="${dist}"/>
+	</target>
+	
+	<!-- Run Junit Test cases. -->
+	<junit printsummary="yes" haltonfailure="yes" showoutput="yes">
+		<classpath>
+			<fileset dir="${lib}">
+				<include name="**/*.jar"/>
+			</fileset>
+			<fileset dir="${build}">
+				<include name="**/*.class"/>
+			</fileset>
+		</classpath>
+        <batchtest fork="yes" todir="${reports}/">
+            <formatter type="xml"/>
+            <fileset dir="${src}">
+                    <include name="com/easyJ/junit/**/*Test.java"/>
+            </fileset>
+        </batchtest>
+	</junit>
+</project>
